@@ -1,0 +1,12 @@
+﻿{
+  "Id": "RTAutoBuilder",
+  "DisplayName": "Auto Builder",
+  "Author": "AlterAsc",
+  "Version": "1.0.0",
+  "ManagerVersion": "0.25.0",
+  "Requirements": [],
+  "AssemblyName": "RTAutoBuilder.dll",
+  "EntryMethod": "RTAutoBuilder.Main.Load",
+  "HomePage": "",
+  "Repository": "https://raw.githubusercontent.com/alterasc/RTAutoBuilder/main/Repository.json"
+}
