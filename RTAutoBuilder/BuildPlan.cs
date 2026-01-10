@@ -7,6 +7,8 @@ public class BuildPlan
 {
     public int Version;
     public string UnitId = null!;
+    public string? Homeworld;
+    public string? Origin;
     public string FirstArchetype = null!;
     public string SecondArchetype = null!;
     public string BuildComment = string.Empty;

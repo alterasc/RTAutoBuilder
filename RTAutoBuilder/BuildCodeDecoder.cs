@@ -68,7 +68,7 @@ internal static class BuildCodeDecoder
         {
             throw new Exception("Invalid code version");
         }
-        if (result.Version > 0)
+        if (result.Version > 1)
         {
             throw new Exception("Build is marked for version not supported by this mod version. Update the mod.");
         }
@@ -93,17 +93,21 @@ internal static class BuildCodeDecoder
         }
         catch (Exception)
         {
-            throw new Exception("Invalid code. Plan must have all archetypes set.");
+            throw new Exception("Plan must have all archetypes set.");
+        }
+        if (firstArchetype == null || secondArchetype == null)
+        {
+            throw new Exception("Plan must have all archetypes set.");
         }
         foreach (var _ in PlayerStatsSorted)
         {
             unpacker.Read(2);
         }
         // reading them to progress offset, not using them for now
-        unpacker.ReadGroup(FeatureGroup.ChargenHomeworld);
+        result.Homeworld = unpacker.ReadGroup(FeatureGroup.ChargenHomeworld);        
         unpacker.ReadGroup(FeatureGroup.ChargenImperialWorld);
         unpacker.ReadGroup(FeatureGroup.ChargenForgeWorld);
-        unpacker.ReadGroup(FeatureGroup.ChargenOccupation);
+        result.Origin = unpacker.ReadGroup(FeatureGroup.ChargenOccupation);
         unpacker.ReadGroup(FeatureGroup.ChargenNavigator);
         unpacker.ReadGroup(FeatureGroup.ChargenPsyker);
         unpacker.ReadGroup(FeatureGroup.ChargenArbitrator);
@@ -129,14 +133,20 @@ internal static class BuildCodeDecoder
                 for (int j = 0; j < entry.m_Selections.Length; j++)
                 {
                     var featureSelection = entry.m_Selections[j].Get() as BlueprintSelectionFeature;
-                    var sel = unpacker.ReadGroup(featureSelection!.Group);
-                    result.Selections[archetype.AssetGuid].Add(new BuildPlan.PlanRankEntry
+                    try
                     {
-                        FeatureGroup = featureSelection.Group.ToString(),
-                        Rank = rank,
-                        Selection = sel
-                    });
-                    //Main.Log.Log($"Set selection for first at rank {rank}, group: {featureSelection.Group}, selection: {sel}");
+                        var sel = unpacker.ReadGroup(featureSelection!.Group);
+                        result.Selections[archetype.AssetGuid].Add(new BuildPlan.PlanRankEntry
+                        {
+                            FeatureGroup = featureSelection.Group.ToString(),
+                            Rank = rank,
+                            Selection = sel
+                        });
+                    }
+                    catch (Exception e)
+                    {
+                        throw new Exception($"Error when decoding selection for archetype {archetype} at rank {rank}, group: {featureSelection?.Group}", e);
+                    }
                 }
             }
         }

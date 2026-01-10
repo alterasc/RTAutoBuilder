@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using Kingmaker;
 using Kingmaker.Blueprints;
+using Kingmaker.UnitLogic.Progression.Features;
 using Kingmaker.UnitLogic.Progression.Paths;
 using Kingmaker.Utility.DotNetExtensions;
 using Newtonsoft.Json;
@@ -10,7 +11,6 @@ using UnityModManagerNet;
 
 namespace RTAutoBuilder;
 
-[EnableReloading]
 public static class Main
 {
     internal static Harmony HarmonyInstance = null!;
@@ -122,11 +122,19 @@ public static class Main
                 GUILayout.BeginHorizontal();
                 var firstArch = ResourcesLibrary.TryGetBlueprint<BlueprintCareerPath>(plan.FirstArchetype).Name;
                 var secondArch = ResourcesLibrary.TryGetBlueprint<BlueprintCareerPath>(plan.SecondArchetype).Name;
-
-                GUILayout.Label($"{firstArch} {secondArch}", firstColumnWidth);
-
+                if (plan.UnitId == CharacterTools.MAIN_CHARACTER_ID)
+                {
+                    var homeworld = ResourcesLibrary.TryGetBlueprint<BlueprintFeature>(plan.Homeworld)?.Name;
+                    var origin = ResourcesLibrary.TryGetBlueprint<BlueprintFeature>(plan.Origin)?.Name;
+                    GUILayout.Label($"{homeworld} {origin} {firstArch} {secondArch}", firstColumnWidth);
+                }
+                else
+                {
+                    GUILayout.Label($"{firstArch} {secondArch}", firstColumnWidth);
+                }
                 string statusText;
                 var statusStyle = new GUIStyle(GUI.skin.label);
+                var codeActive = false;
                 if (!isInGame)
                 {
                     statusText = "Not in Game";
@@ -139,6 +147,7 @@ public static class Main
                         {
                             statusText = "Active";
                             statusStyle.normal.textColor = Color.green;
+                            codeActive = true;
                         }
                         else
                         {
@@ -153,9 +162,17 @@ public static class Main
                 GUILayout.Label(statusText, statusStyle, labelWidth);
 
                 GUI.enabled = isInGame;
-                if (GUILayout.Button("Activate", labelWidth))
+                var buttonText = codeActive ? "Deactivate" : "Activate";
+                if (GUILayout.Button(buttonText, labelWidth))
                 {
-                    SaveSpecificSettings.Instance?.AppliedBuilds[plan.UnitId] = plan.BuildCode;
+                    if (codeActive)
+                    {
+                        SaveSpecificSettings.Instance?.AppliedBuilds.Remove(plan.UnitId);
+                    }
+                    else
+                    {
+                        SaveSpecificSettings.Instance?.AppliedBuilds[plan.UnitId] = plan.BuildCode;
+                    }
                 }
                 GUI.enabled = true;
 

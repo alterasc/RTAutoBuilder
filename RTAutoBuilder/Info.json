@@ -1,12 +1,12 @@
 ﻿{
   "Id": "RTAutoBuilder",
-  "DisplayName": "Auto Builder",
+  "DisplayName": "Character Auto Builder",
   "Author": "AlterAsc",
   "Version": "1.0.0",
   "ManagerVersion": "0.25.0",
   "Requirements": [],
   "AssemblyName": "RTAutoBuilder.dll",
   "EntryMethod": "RTAutoBuilder.Main.Load",
-  "HomePage": "",
+  "HomePage": "https://www.nexusmods.com/warhammer40kroguetrader/mods/390",
   "Repository": "https://raw.githubusercontent.com/alterasc/RTAutoBuilder/main/Repository.json"
 }

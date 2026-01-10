@@ -35,16 +35,9 @@ public static class Patches
                 var plan = Main.Settings.BuildPlans.FirstOrDefault(x => x.BuildCode == buildCode);
                 if (plan == null)
                 {
-                    try
-                    {
-                        plan = BuildCodeDecoder.Decode(buildCode);
-                    }
-                    catch (Exception e)
-                    {
-                        Main.Log.Error($"Couldn't decode plan: {buildCode}. Removed it from preselection. Error: {e}");
-                        instance.AppliedBuilds.Remove(rtCharacter.Id);
-                        return;
-                    }
+                    instance.AppliedBuilds.Remove(rtCharacter.Id);
+                    Main.Log.Log($"Removed code {buildCode} from save, because it is no longer present in global settings");
+                    return;
                 }
 
                 foreach (var item in arr)
