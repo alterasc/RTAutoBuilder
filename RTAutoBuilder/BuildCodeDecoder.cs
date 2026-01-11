@@ -198,7 +198,7 @@ internal static class BuildCodeDecoder
     public static int GetGroupLength(string group)
     {
         var groupLength = Main.CodeGuidMap[group].Count;
-        var bitsNeeded = (int)Math.Ceiling(Math.Log(groupLength, 2));
+        var bitsNeeded = (int)Math.Ceiling(Math.Log(groupLength + 1, 2));
         return bitsNeeded;
     }
 
@@ -251,6 +251,7 @@ internal static class BuildCodeDecoder
             {
                 return string.Empty;
             }
+            Main.Log.Log($"Read {value}, bits {length}, group {featureGroup}");
             var result = Main.CodeGuidMap[mappedGroup][value];
             Main.Log.Log($"Decode feature {ResourcesLibrary.TryGetBlueprint<BlueprintUnitFact>(result).Name}");
             return result;
