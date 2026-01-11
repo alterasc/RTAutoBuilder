@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using Kingmaker;
 using Kingmaker.Blueprints;
+using Kingmaker.GameInfo;
 using Kingmaker.UnitLogic.Progression.Features;
 using Kingmaker.UnitLogic.Progression.Paths;
 using Kingmaker.Utility.DotNetExtensions;
@@ -11,6 +12,9 @@ using UnityModManagerNet;
 
 namespace RTAutoBuilder;
 
+#if DEBUG
+[EnableReloading]
+#endif
 public static class Main
 {
     internal static Harmony HarmonyInstance = null!;
@@ -66,8 +70,10 @@ public static class Main
     {
         var isInGame = IsInGame();
         var firstColumnWidth = GUILayout.Width(GUI.skin.label.CalcSize(new GUIContent("Blademaster Master Tactician    ")).x);
-        var labelWidth = GUILayout.Width(GUI.skin.label.CalcSize(new GUIContent("Process Input")).x);
-        var commentWidth = GUILayout.Width(GUI.skin.label.CalcSize(new GUIContent("Comment should have enough space I think, more than enough")).x);
+        var labelWidth = GUILayout.Width(GUI.skin.label.CalcSize(new GUIContent("Copy build code111111")).x);
+        var exportWidth = GUILayout.Width(GUI.skin.label.CalcSize(new GUIContent("Export Code")).x * 2);
+        var commentWidth = GUILayout.Width(GUI.skin.label
+            .CalcSize(new GUIContent("Comment should have enough space I think, more than enough")).x);
         GUILayout.BeginVertical(GUILayout.Width(1900));
 
         // Large text input
@@ -99,9 +105,7 @@ public static class Main
 
         GUILayout.Space(20);
         // Group by unitKey and sort
-        var groupedPlans = Settings.BuildPlans
-            .GroupBy(bp => bp.UnitId)
-            .OrderBy(g => CharacterTools.GetRTCharacter(g.Key).Index);
+
 
         GUILayout.BeginHorizontal();
         GUILayout.Label("Character/Build", unitHeaderStyle, firstColumnWidth);
@@ -111,13 +115,112 @@ public static class Main
         GUILayout.Label("Your comment", unitHeaderStyle, commentWidth);
         GUILayout.EndHorizontal();
         GUILayout.Space(10);
-        foreach (var group in groupedPlans)
-        {
-            // Unit header
-            GUILayout.Label(CharacterTools.GetName(group.Key), unitHeaderStyle, firstColumnWidth);
+        GUILayout.Space(10);
 
-            // Builds for this unit
-            foreach (var plan in group.OrderBy(p => p.BuildCode))
+        List<string> party = [];
+
+        Dictionary<string, (RTCharacter character, bool isInParty)> charactersToDisplay = [];
+
+        if (isInGame)
+        {
+            foreach (var member in Game.Instance.Player.Party)
+            {
+                try
+                {
+                    var c = CharacterTools.GetRTCharacter(member);
+                    charactersToDisplay[c.Id] = (c, true);
+                }
+                catch (Exception e)
+                {
+                    Log.LogException("Unknown character", e);
+                }
+            }
+        }
+        foreach (var plan in Settings.BuildPlans)
+        {
+            if (!charactersToDisplay.ContainsKey(plan.UnitId))
+            {
+                charactersToDisplay[plan.UnitId] = (CharacterTools.GetRTCharacter(plan.UnitId), false);
+            }
+        }
+
+        foreach (var entry in charactersToDisplay.OrderBy(x => x.Value.character.Index))
+        {
+            Rect r = GUILayoutUtility.GetRect(1, 3, GUILayout.ExpandWidth(true));
+            GUI.color = Color.gray;
+            GUI.DrawTexture(r, Texture2D.whiteTexture);
+            GUI.color = Color.white;
+            GUILayout.Space(3);
+            var rtCharacter = entry.Value.character;
+            var isInParty = entry.Value.isInParty;
+            GUILayout.BeginHorizontal();
+            // Unit header
+            GUILayout.Label(rtCharacter.LocalizedName, unitHeaderStyle, firstColumnWidth);
+            if (isInParty)
+            {
+                GUILayout.Label("", labelWidth);
+                GUILayout.Label("", labelWidth);
+                var uni = Game.Instance.Player.Party.First(x => CharacterTools.GetRTCharacter(x).Id == rtCharacter.Id);
+
+                if (GUILayout.Button("Copy build code", labelWidth))
+                {
+                    try
+                    {
+                        var code = Exporter.ExportCompanions(uni);
+                        GUIUtility.systemCopyBuffer = code;
+                    }
+                    catch (Exception e)
+                    {
+                        Log.LogException(e);
+                        outputText = e.Message;
+                    }
+                }
+                if (GUILayout.Button("Copy build url", labelWidth))
+                {
+                    try
+                    {
+                        var code = Exporter.ExportCompanions(uni);
+                        var finalUrl = $"https://rt-planner.pages.dev/?buildCode={code}";
+                        GUIUtility.systemCopyBuffer = finalUrl;
+                    }
+                    catch (Exception e)
+                    {
+                        Log.LogException(e);
+                        outputText = e.Message;
+                    }
+                }
+                GUILayout.Label("", labelWidth);
+                if (GUILayout.Button("Save as plan", labelWidth))
+                {
+                    try
+                    {
+                        var code = Exporter.ExportCompanions(uni);
+                        var build = BuildCodeDecoder.Decode(code);
+                        build.BuildComment = $"Saved on {DateTime.Now.ToString()}, game version {GameVersion.GetVersion()}";
+                        if (uni.Progression.CharacterLevel < 55)
+                        {
+                            build.BuildComment += $", up to level {uni.Progression.CharacterLevel}";
+                        }
+                        if (!Settings.BuildPlans.Any(x => x.BuildCode == code))
+                        {
+                            Settings.BuildPlans.Add(build);
+                            Settings.Save();
+                        }
+                        else
+                        {
+                            outputText = "This plan is already loaded";
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Log.LogException(e);
+                        outputText = e.Message;
+                    }
+                }
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.Space(6);
+            foreach (var plan in Settings.BuildPlans.Where(x => x.UnitId == rtCharacter.Id).OrderBy(x => x.BuildCode))
             {
                 GUILayout.BeginHorizontal();
                 var firstArch = ResourcesLibrary.TryGetBlueprint<BlueprintCareerPath>(plan.FirstArchetype).Name;
@@ -175,7 +278,33 @@ public static class Main
                     }
                 }
                 GUI.enabled = true;
-
+                if (GUILayout.Button("Copy build code", labelWidth))
+                {
+                    try
+                    {
+                        var code = plan.BuildCode;
+                        GUIUtility.systemCopyBuffer = code;
+                    }
+                    catch (Exception e)
+                    {
+                        Log.LogException(e);
+                        outputText = e.Message;
+                    }
+                }
+                if (GUILayout.Button("Copy build url", labelWidth))
+                {
+                    try
+                    {
+                        var code = plan.BuildCode;
+                        var finalUrl = $"https://rt-planner.pages.dev/?buildCode={code}";
+                        GUIUtility.systemCopyBuffer = finalUrl;
+                    }
+                    catch (Exception e)
+                    {
+                        Log.LogException(e);
+                        outputText = e.Message;
+                    }
+                }
                 if (GUILayout.Button("Delete", labelWidth))
                 {
                     if (SaveSpecificSettings.Instance?.AppliedBuilds.TryGetValue(plan.UnitId, out var appliedPlan) == true)
@@ -194,7 +323,6 @@ public static class Main
             }
             GUILayout.Space(10);
         }
-
         GUILayout.EndVertical();
         Settings.Save();
     }

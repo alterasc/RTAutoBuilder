@@ -23,6 +23,9 @@ public static class CharacterTools
         new RTCharacter("Solomorne", 11, "a699795d21f74159abb00f9a217fa97d"),
         new RTCharacter("Ulfar", 12, "daaf3d6bae644af8a9128ea09044bb99"),
         new RTCharacter("Marazhai", 13, "d2b74abcac1d497992e4cacd2fae1467"),
+        new RTCharacter("Chorda", 14, "884b70bd817640dda143966166587b98", null, ["cabf247f1fb3494289f48a48512132f3"]),
+        new RTCharacter("Winterscale", 15, "73c59c9ec5bd4c929be80e15d7f88c73"),
+        new RTCharacter("Uralon", 16, "c222cb0668ea49f4a9ac04de2a3e25ba"),
     ];
 
     public static RTCharacter GetRTCharacter(BaseUnitEntity unitEntity)
@@ -37,7 +40,7 @@ public static class CharacterTools
         }
         else
         {
-            var result = characters.First(x => x.BlueprintId == unitEntity.Blueprint.AssetGuid);
+            var result = characters.First(x => x.AllBlueprints.Contains(unitEntity.Blueprint.AssetGuid));
             return result;
         }
     }
@@ -64,9 +67,10 @@ public class RTCharacter
     public readonly string Id;
     public readonly int Index;
     public readonly string? BlueprintId;
+    public readonly string[] AllBlueprints;
     private readonly LocalizedString? nameOverride;
 
-    public RTCharacter(string id, int index, string? blueprintId, string? nameKey = null)
+    public RTCharacter(string id, int index, string? blueprintId, string? nameKey = null, string[]? allBlueprints = null)
     {
         Id = id;
         Index = index;
@@ -74,6 +78,14 @@ public class RTCharacter
         if (nameKey != null)
         {
             nameOverride = new LocalizedString { Key = nameKey };
+        }
+        if (blueprintId != null)
+        {
+            AllBlueprints = [blueprintId, .. allBlueprints ?? []];
+        }
+        else
+        {
+            AllBlueprints = [];
         }
     }
 

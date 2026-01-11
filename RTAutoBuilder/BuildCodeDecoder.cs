@@ -10,7 +10,7 @@ namespace RTAutoBuilder;
 internal static class BuildCodeDecoder
 {
     public const string ExemplarArchetype = "bcefe9c41c7841c9a99b1dbac1793025";
-    private static class Base62
+    public static class Base62
     {
         private const string Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
@@ -42,6 +42,37 @@ internal static class BuildCodeDecoder
                 throw new ArgumentException("Invalid length prefix");
 
             return bytes.GetRange(1, length).ToArray();
+        }
+
+        public static string EncodeWithLength(byte[] data)
+        {
+            if (data == null)
+                throw new ArgumentNullException(nameof(data));
+            if (data.Length > 255)
+                throw new ArgumentException("Data too long to encode with single-byte length prefix");
+
+            var withLength = new byte[data.Length + 1];
+            withLength[0] = (byte)data.Length;
+            Array.Copy(data, 0, withLength, 1, data.Length);
+
+            BigInteger value = BigInteger.Zero;
+            foreach (byte b in withLength)
+            {
+                value = (value << 8) | b;
+            }
+
+            if (value == BigInteger.Zero)
+                return Alphabet[0].ToString();
+
+            var chars = new List<char>();
+            while (value > 0)
+            {
+                value = BigInteger.DivRem(value, 62, out BigInteger rem);
+                chars.Add(Alphabet[(int)rem]);
+            }
+
+            chars.Reverse();
+            return new string(chars.ToArray());
         }
     }
 
@@ -104,7 +135,7 @@ internal static class BuildCodeDecoder
             unpacker.Read(2);
         }
         // reading them to progress offset, not using them for now
-        result.Homeworld = unpacker.ReadGroup(FeatureGroup.ChargenHomeworld);        
+        result.Homeworld = unpacker.ReadGroup(FeatureGroup.ChargenHomeworld);
         unpacker.ReadGroup(FeatureGroup.ChargenImperialWorld);
         unpacker.ReadGroup(FeatureGroup.ChargenForgeWorld);
         result.Origin = unpacker.ReadGroup(FeatureGroup.ChargenOccupation);
@@ -152,7 +183,7 @@ internal static class BuildCodeDecoder
         }
     }
 
-    private static string[] PlayerStatsSorted = [
+    public static string[] PlayerStatsSorted = [
         "WarhammerWeaponSkill",
         "WarhammerBallisticSkill",
         "WarhammerStrength",
@@ -164,7 +195,7 @@ internal static class BuildCodeDecoder
         "WarhammerFellowship"
     ];
 
-    private static int GetGroupLength(string group)
+    public static int GetGroupLength(string group)
     {
         var groupLength = Main.CodeGuidMap[group].Count;
         var bitsNeeded = (int)Math.Ceiling(Math.Log(groupLength, 2));
@@ -232,3 +263,47 @@ internal static class BuildCodeDecoder
     }
 }
 
+
+
+public static class BitPacker
+{
+    public static byte[] PackChoices(int[] choices, int[] bitsPerChoice)
+    {
+        if (choices == null)
+            throw new ArgumentNullException(nameof(choices));
+        if (bitsPerChoice == null)
+            throw new ArgumentNullException(nameof(bitsPerChoice));
+        if (choices.Length != bitsPerChoice.Length)
+            throw new ArgumentException($"choices and bitsPerChoice must have the same length {choices.Length} {bitsPerChoice.Length}");
+
+        int bitLength = 0;
+        for (int i = 0; i < bitsPerChoice.Length; i++)
+            bitLength += bitsPerChoice[i];
+
+        int byteLength = (bitLength + 7) / 8;
+        var buffer = new byte[byteLength];
+
+        int bitOffset = 0;
+
+        for (int i = 0; i < choices.Length; i++)
+        {
+            int value = choices[i];
+            int bits = bitsPerChoice[i];
+
+            for (int b = bits - 1; b >= 0; b--)
+            {
+                int bit = (value >> b) & 1;
+
+                int byteIndex = bitOffset >> 3;
+                int bitIndex = 7 - (bitOffset & 7);
+
+                if (bit == 1)
+                    buffer[byteIndex] |= (byte)(1 << bitIndex);
+
+                bitOffset++;
+            }
+        }
+
+        return buffer;
+    }
+}
