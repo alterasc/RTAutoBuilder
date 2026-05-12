@@ -117,9 +117,7 @@ public static class Main
         GUILayout.Space(10);
         GUILayout.Space(10);
 
-        List<string> party = [];
-
-        Dictionary<string, (RTCharacter character, bool isInParty)> charactersToDisplay = [];
+        Dictionary<string, CharacterDisplayEntry> charactersToDisplay = [];
 
         if (isInGame)
         {
@@ -128,7 +126,7 @@ public static class Main
                 try
                 {
                     var c = CharacterTools.GetRTCharacter(member);
-                    charactersToDisplay[c.Id] = (c, true);
+                    charactersToDisplay[c.Id] = new CharacterDisplayEntry(c, true, member);
                 }
                 catch (Exception e)
                 {
@@ -140,186 +138,211 @@ public static class Main
         {
             if (!charactersToDisplay.ContainsKey(plan.UnitId))
             {
-                charactersToDisplay[plan.UnitId] = (CharacterTools.GetRTCharacter(plan.UnitId), false);
+                charactersToDisplay[plan.UnitId] = new CharacterDisplayEntry(CharacterTools.GetRTCharacter(plan.UnitId), false, null);
             }
         }
 
-        foreach (var entry in charactersToDisplay.OrderBy(x => x.Value.character.Index))
+        foreach (var entry in charactersToDisplay.OrderBy(x => x.Value.Character.Index))
         {
             Rect r = GUILayoutUtility.GetRect(1, 3, GUILayout.ExpandWidth(true));
             GUI.color = Color.gray;
             GUI.DrawTexture(r, Texture2D.whiteTexture);
             GUI.color = Color.white;
             GUILayout.Space(3);
-            var rtCharacter = entry.Value.character;
-            var isInParty = entry.Value.isInParty;
+            var rtCharacter = entry.Value.Character;
+            var isInParty = entry.Value.IsInParty;
+            var uni = entry.Value.Unit;
             GUILayout.BeginHorizontal();
-            // Unit header
-            GUILayout.Label(rtCharacter.LocalizedName, unitHeaderStyle, firstColumnWidth);
-            if (isInParty)
+            try
             {
-                GUILayout.Label("", labelWidth);
-                GUILayout.Label("", labelWidth);
-                var uni = Game.Instance.Player.Party.First(x => CharacterTools.GetRTCharacter(x).Id == rtCharacter.Id);
+                // Unit header
+                GUILayout.Label(rtCharacter.LocalizedName, unitHeaderStyle, firstColumnWidth);
+                if (isInParty && uni != null)
+                {
+                    GUILayout.Label("", labelWidth);
+                    GUILayout.Label("", labelWidth);
 
-                if (GUILayout.Button("Copy build code", labelWidth))
-                {
-                    try
+                    if (GUILayout.Button("Copy build code", labelWidth))
                     {
-                        var code = Exporter.ExportCompanions(uni);
-                        GUIUtility.systemCopyBuffer = code;
-                    }
-                    catch (Exception e)
-                    {
-                        Log.LogException(e);
-                        outputText = e.Message;
-                    }
-                }
-                if (GUILayout.Button("Copy build url", labelWidth))
-                {
-                    try
-                    {
-                        var code = Exporter.ExportCompanions(uni);
-                        var finalUrl = $"https://rt-planner.pages.dev/?buildCode={code}";
-                        GUIUtility.systemCopyBuffer = finalUrl;
-                    }
-                    catch (Exception e)
-                    {
-                        Log.LogException(e);
-                        outputText = e.Message;
-                    }
-                }
-                GUILayout.Label("", labelWidth);
-                if (GUILayout.Button("Save as plan", labelWidth))
-                {
-                    try
-                    {
-                        var code = Exporter.ExportCompanions(uni);
-                        var build = BuildCodeDecoder.Decode(code);
-                        build.BuildComment = $"Saved on {DateTime.Now.ToString()}, game version {GameVersion.GetVersion()}";
-                        if (uni.Progression.CharacterLevel < 55)
+                        try
                         {
-                            build.BuildComment += $", up to level {uni.Progression.CharacterLevel}";
+                            var code = Exporter.ExportCompanions(uni);
+                            GUIUtility.systemCopyBuffer = code;
                         }
-                        if (!Settings.BuildPlans.Any(x => x.BuildCode == code))
+                        catch (Exception e)
                         {
-                            Settings.BuildPlans.Add(build);
-                            Settings.Save();
-                        }
-                        else
-                        {
-                            outputText = "This plan is already loaded";
+                            Log.LogException(e);
+                            outputText = e.Message;
                         }
                     }
-                    catch (Exception e)
+                    if (GUILayout.Button("Copy build url", labelWidth))
                     {
-                        Log.LogException(e);
-                        outputText = e.Message;
+                        try
+                        {
+                            var code = Exporter.ExportCompanions(uni);
+                            var finalUrl = $"https://rt-planner.pages.dev/?buildCode={code}";
+                            GUIUtility.systemCopyBuffer = finalUrl;
+                        }
+                        catch (Exception e)
+                        {
+                            Log.LogException(e);
+                            outputText = e.Message;
+                        }
+                    }
+                    GUILayout.Label("", labelWidth);
+                    if (GUILayout.Button("Save as plan", labelWidth))
+                    {
+                        try
+                        {
+                            var code = Exporter.ExportCompanions(uni);
+                            var build = BuildCodeDecoder.Decode(code);
+                            build.BuildComment = $"Saved on {DateTime.Now.ToString()}, game version {GameVersion.GetVersion()}";
+                            if (uni.Progression.CharacterLevel < 55)
+                            {
+                                build.BuildComment += $", up to level {uni.Progression.CharacterLevel}";
+                            }
+                            if (!Settings.BuildPlans.Any(x => x.BuildCode == code))
+                            {
+                                Settings.BuildPlans.Add(build);
+                                Settings.Save();
+                            }
+                            else
+                            {
+                                outputText = "This plan is already loaded";
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Log.LogException(e);
+                            outputText = e.Message;
+                        }
                     }
                 }
             }
-            GUILayout.EndHorizontal();
+            catch (Exception e)
+            {
+                Log.LogException(e);
+            }
+            finally
+            {
+                GUILayout.EndHorizontal();
+            }
             GUILayout.Space(6);
             foreach (var plan in Settings.BuildPlans.Where(x => x.UnitId == rtCharacter.Id).OrderBy(x => x.BuildCode))
             {
                 GUILayout.BeginHorizontal();
-                var firstArch = ResourcesLibrary.TryGetBlueprint<BlueprintCareerPath>(plan.FirstArchetype).Name;
-                var secondArch = ResourcesLibrary.TryGetBlueprint<BlueprintCareerPath>(plan.SecondArchetype).Name;
-                if (plan.UnitId == CharacterTools.MAIN_CHARACTER_ID)
+                try
                 {
-                    var homeworld = ResourcesLibrary.TryGetBlueprint<BlueprintFeature>(plan.Homeworld)?.Name;
-                    var origin = ResourcesLibrary.TryGetBlueprint<BlueprintFeature>(plan.Origin)?.Name;
-                    GUILayout.Label($"{homeworld} {origin} {firstArch} {secondArch}", firstColumnWidth);
-                }
-                else
-                {
-                    GUILayout.Label($"{firstArch} {secondArch}", firstColumnWidth);
-                }
-                string statusText;
-                var statusStyle = new GUIStyle(GUI.skin.label);
-                var codeActive = false;
-                if (!isInGame)
-                {
-                    statusText = "Not in Game";
-                }
-                else
-                {
-                    if (SaveSpecificSettings.Instance?.AppliedBuilds.TryGetValue(plan.UnitId, out var appliedPlan) == true)
+                    var firstArch = ResourcesLibrary.TryGetBlueprint<BlueprintCareerPath>(plan.FirstArchetype)?.Name;
+                    var secondArch = ResourcesLibrary.TryGetBlueprint<BlueprintCareerPath>(plan.SecondArchetype)?.Name;
+                    if (plan.UnitId == CharacterTools.MAIN_CHARACTER_ID)
                     {
-                        if (appliedPlan == plan.BuildCode)
+                        var homeworld = ResourcesLibrary.TryGetBlueprint<BlueprintFeature>(plan.Homeworld)?.Name;
+                        var origin = ResourcesLibrary.TryGetBlueprint<BlueprintFeature>(plan.Origin)?.Name;
+                        GUILayout.Label($"{homeworld} {origin} {firstArch} {secondArch}", firstColumnWidth);
+                    }
+                    else
+                    {
+                        GUILayout.Label($"{firstArch} {secondArch}", firstColumnWidth);
+                    }
+                    string statusText;
+                    var statusStyle = new GUIStyle(GUI.skin.label);
+                    var codeActive = false;
+                    if (!isInGame)
+                    {
+                        statusText = "Not in Game";
+                    }
+                    else
+                    {
+                        if (SaveSpecificSettings.Instance?.AppliedBuilds.TryGetValue(plan.UnitId, out var appliedPlan) == true)
                         {
-                            statusText = "Active";
-                            statusStyle.normal.textColor = Color.green;
-                            codeActive = true;
+                            if (appliedPlan == plan.BuildCode)
+                            {
+                                statusText = "Active";
+                                statusStyle.normal.textColor = Color.green;
+                                codeActive = true;
+                            }
+                            else
+                            {
+                                statusText = "Inactive";
+                            }
                         }
                         else
                         {
                             statusText = "Inactive";
                         }
                     }
-                    else
-                    {
-                        statusText = "Inactive";
-                    }
-                }
-                GUILayout.Label(statusText, statusStyle, labelWidth);
+                    GUILayout.Label(statusText, statusStyle, labelWidth);
 
-                GUI.enabled = isInGame;
-                var buttonText = codeActive ? "Deactivate" : "Activate";
-                if (GUILayout.Button(buttonText, labelWidth))
-                {
-                    if (codeActive)
-                    {
-                        SaveSpecificSettings.Instance?.AppliedBuilds.Remove(plan.UnitId);
-                    }
-                    else
-                    {
-                        SaveSpecificSettings.Instance?.AppliedBuilds[plan.UnitId] = plan.BuildCode;
-                    }
-                }
-                GUI.enabled = true;
-                if (GUILayout.Button("Copy build code", labelWidth))
-                {
+                    GUI.enabled = isInGame;
                     try
                     {
-                        var code = plan.BuildCode;
-                        GUIUtility.systemCopyBuffer = code;
-                    }
-                    catch (Exception e)
-                    {
-                        Log.LogException(e);
-                        outputText = e.Message;
-                    }
-                }
-                if (GUILayout.Button("Copy build url", labelWidth))
-                {
-                    try
-                    {
-                        var code = plan.BuildCode;
-                        var finalUrl = $"https://rt-planner.pages.dev/?buildCode={code}";
-                        GUIUtility.systemCopyBuffer = finalUrl;
-                    }
-                    catch (Exception e)
-                    {
-                        Log.LogException(e);
-                        outputText = e.Message;
-                    }
-                }
-                if (GUILayout.Button("Delete", labelWidth))
-                {
-                    if (SaveSpecificSettings.Instance?.AppliedBuilds.TryGetValue(plan.UnitId, out var appliedPlan) == true)
-                    {
-                        if (appliedPlan == plan.BuildCode)
+                        var buttonText = codeActive ? "Deactivate" : "Activate";
+                        if (GUILayout.Button(buttonText, labelWidth))
                         {
-                            SaveSpecificSettings.Instance?.AppliedBuilds.Remove(plan.UnitId);
+                            if (codeActive)
+                            {
+                                SaveSpecificSettings.Instance?.AppliedBuilds.Remove(plan.UnitId);
+                            }
+                            else
+                            {
+                                SaveSpecificSettings.Instance?.AppliedBuilds[plan.UnitId] = plan.BuildCode;
+                            }
                         }
                     }
-                    Settings.BuildPlans.RemoveAll(x => x.BuildCode == plan.BuildCode);
+                    finally
+                    {
+                        GUI.enabled = true;
+                    }
+                    if (GUILayout.Button("Copy build code", labelWidth))
+                    {
+                        try
+                        {
+                            var code = plan.BuildCode;
+                            GUIUtility.systemCopyBuffer = code;
+                        }
+                        catch (Exception e)
+                        {
+                            Log.LogException(e);
+                            outputText = e.Message;
+                        }
+                    }
+                    if (GUILayout.Button("Copy build url", labelWidth))
+                    {
+                        try
+                        {
+                            var code = plan.BuildCode;
+                            var finalUrl = $"https://rt-planner.pages.dev/?buildCode={code}";
+                            GUIUtility.systemCopyBuffer = finalUrl;
+                        }
+                        catch (Exception e)
+                        {
+                            Log.LogException(e);
+                            outputText = e.Message;
+                        }
+                    }
+                    if (GUILayout.Button("Delete", labelWidth))
+                    {
+                        if (SaveSpecificSettings.Instance?.AppliedBuilds.TryGetValue(plan.UnitId, out var appliedPlan) == true)
+                        {
+                            if (appliedPlan == plan.BuildCode)
+                            {
+                                SaveSpecificSettings.Instance?.AppliedBuilds.Remove(plan.UnitId);
+                            }
+                        }
+                        Settings.BuildPlans.RemoveAll(x => x.BuildCode == plan.BuildCode);
+                    }
+
+                    plan.BuildComment = GUILayout.TextArea(plan.BuildComment, commentWidth);
                 }
-
-                plan.BuildComment = GUILayout.TextArea(plan.BuildComment, commentWidth);
-
-                GUILayout.EndHorizontal();
+                catch (Exception e)
+                {
+                    Log.LogException(e);
+                }
+                finally
+                {
+                    GUILayout.EndHorizontal();
+                }
             }
             GUILayout.Space(10);
         }

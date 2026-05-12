@@ -4,6 +4,20 @@ using Kingmaker.Localization;
 
 namespace RTAutoBuilder;
 
+public struct CharacterDisplayEntry
+{
+    public RTCharacter Character;
+    public bool IsInParty;
+    public BaseUnitEntity? Unit;
+
+    public CharacterDisplayEntry(RTCharacter character, bool isInParty, BaseUnitEntity? unit)
+    {
+        Character = character;
+        IsInParty = isInParty;
+        Unit = unit;
+    }
+}
+
 public static class CharacterTools
 {
     public const string MAIN_CHARACTER_ID = "RogueTrader";
