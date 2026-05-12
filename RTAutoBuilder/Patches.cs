@@ -48,6 +48,7 @@ public static class Patches
                     var toSelect = plan.GetSelection(career, rank, group);
                     if (!string.IsNullOrEmpty(toSelect))
                     {
+                        item.UpdateFeatures();
                         var preselection = item.m_ShowGroupList
                             .Where(x => x.FeatureList != null)
                             .SelectMany(x => x.FeatureList)
@@ -57,6 +58,28 @@ public static class Patches
                             Main.Log.Log($"Found selection for career: {career}, at rank {rank}, group: {group}, found: {toSelect}");
                             preselection.Select();
                         }
+                        else
+                        {
+                            var groupList = item.m_ShowGroupList;
+                            if (groupList == null)
+                            {
+                                Main.Log.Log($"Couldn't find selection for career: {career}, at rank {rank}, group: {group}, expected: {toSelect} — m_ShowGroupList is NULL");
+                            }
+                            else
+                            {
+                                var allGuids = groupList
+                                    .Where(x => x.FeatureList != null)
+                                    .SelectMany(x => x.FeatureList)
+                                    .Where(x => x.Feature != null)
+                                    .Select(x => x.Feature.AssetGuid)
+                                    .ToList();
+                                Main.Log.Log($"Couldn't find selection for career: {career}, at rank {rank}, group: {group}, expected: {toSelect} — {groupList.Count} group(s), {allGuids.Count} feature(s) available: [{string.Join(", ", allGuids)}]");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Main.Log.Log($"No selection for career: {career}, at rank {rank}, group: {group}");
                     }
                 }
             }
