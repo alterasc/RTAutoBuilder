@@ -136,9 +136,20 @@ internal static class BuildCodeDecoder
         }
         // reading them to progress offset, not using them for now
         result.Homeworld = unpacker.ReadGroup(FeatureGroup.ChargenHomeworld);
+
         unpacker.ReadGroup(FeatureGroup.ChargenImperialWorld);
-        unpacker.ReadGroup(FeatureGroup.ChargenForgeWorld);
-        result.Origin = unpacker.ReadGroup(FeatureGroup.ChargenOccupation);
+
+        if (result.Version == 1)
+        {
+            // ForgeWorld was 1 bit shorter
+            unpacker.ReadGroup(FeatureGroup.ChargenForgeWorld, 2);
+            result.Origin = unpacker.ReadGroup(FeatureGroup.ChargenOccupation, 5);
+        }
+        else
+        {
+            unpacker.ReadGroup(FeatureGroup.ChargenForgeWorld);
+            result.Origin = unpacker.ReadGroup(FeatureGroup.ChargenOccupation);
+        }
         unpacker.ReadGroup(FeatureGroup.ChargenNavigator);
         unpacker.ReadGroup(FeatureGroup.ChargenPsyker);
         unpacker.ReadGroup(FeatureGroup.ChargenArbitrator);
@@ -241,10 +252,13 @@ internal static class BuildCodeDecoder
             return value;
         }
 
-        public string ReadGroup(FeatureGroup featureGroup)
+        public string ReadGroup(FeatureGroup featureGroup, int length = 0)
         {
             string mappedGroup = MapGroup(featureGroup);
-            int length = GetGroupLength(mappedGroup);
+            if (length == 0)
+            {
+                length = GetGroupLength(mappedGroup);
+            }
             int value = Read(length);
             //Main.Log.Log($"Read {length} bits, value: {value}, new offset: {_bitOffset}, mapped group: {mappedGroup}, original group: {featureGroup}");
             if (value == 0)
