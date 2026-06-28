@@ -599,7 +599,31 @@
     "597": "a8a919250f28499199e5f0d1122aa4e8",
     "598": "07be5f794f6b4f54b91b0904e0c50e4b",
     "599": "c332d4c355ea40a6b8bb0bd454a2fdac",
-    "600": "39e0d1de97e44e67bd15e2dddd3352a3"
+    "600": "39e0d1de97e44e67bd15e2dddd3352a3",
+    "601": "2ba2e432183f492bb9cdf9cc063305ce",
+    "602": "858001cc93974c8da24aaa0d02c453aa",
+    "603": "eae88f4723d34f1099b93ad9de870bba",
+    "604": "13cc8a332ea948ae82c335f619c524cc",
+    "605": "45449e93227647d2acc6dc38437ed1f0",
+    "606": "420670148c0941c88c9730debf8fa4ca",
+    "607": "aaeda42d064d48bf963fea6137fdd062",
+    "608": "d2744ed45d3e43abb909a9f741a6818a",
+    "609": "fb3769f45c4b4429aeb5c6323be7b8fa",
+    "610": "b9936af246d44bb19c8bc8167b891714",
+    "611": "b9b50694872d4d6eb6f37537958662c4",
+    "612": "c49f6ede0ecd44f1aa996e9300513c17",
+    "613": "e2892494765548f984b6173cb7f1b340",
+    "614": "577cb8202ec3465fbd4821afce831bd7",
+    "615": "eb0608b0a5f148deb38226e8fc6f6997",
+    "616": "dc6f47b218804f308ef002560628e43d",
+    "617": "c1c1223167f041e2aa5a7d4885d3f80f",
+    "618": "930ce7e4b50d489d825b3dd69329c3bd",
+    "619": "865af18122c14c6a8db132e06a7b867d",
+    "620": "52fe1454f6054f119ddafd9941b3950c",
+    "621": "1a136500fdf44c6e8f306e0790feb0dc",
+    "622": "afb8bb9d61514bc69888170dfc76f035",
+    "623": "e7e7364223af4796940df28d77a51c29",
+    "624": "00eab283e6954ab0a20a5cb71e398226"
   },
   "ChargenHomeworld": {
     "1": "5ab7897d0830402ba9809eca3df21d58",
@@ -619,7 +643,8 @@
     "15": "d7953c4cbf47463090ee3025ef390063",
     "16": "2ef8b22a98c049a5b4f44864c1d1b642",
     "17": "a69ab12837ae4bfea6bb56f834892d7f",
-    "18": "b504a419af314de1ab85c86bc8b54907"
+    "18": "b504a419af314de1ab85c86bc8b54907",
+    "19": "7882e53a3f1b412989ed3e45ba1592a0"
   },
   "ChargenOccupation": {
     "1": "4b908491051a4f36b9703b95e048a5a3",
@@ -652,7 +677,9 @@
     "28": "9b090810169e4a42b22afd5995d3720d",
     "29": "cd1baf99dad544168bbf4962b3389d94",
     "30": "8ca6cc2ee71748ddab3513339cf05ad6",
-    "31": "1518d1434ed646039215da3fdda6b096"
+    "31": "1518d1434ed646039215da3fdda6b096",
+    "32": "b901e045ca514d53bae43f4a9ecdf0b4",
+    "33": "b65508c9f2b04ce9ab389c87587d4cd7"
   },
   "ChargenDarkestHour": {
     "1": "04f4eca5cad54087a648a05168cbea96",
@@ -948,7 +975,11 @@
     "135": "140ea8cb4d67487a85323b523308c1cb",
     "136": "0eb3cd8473254e38b585dbaa1c55ad9d",
     "137": "a358b39479c644748a0c3211e99f3fe5",
-    "138": "76e37b6d00b14fbea50c39784b768098"
+    "138": "76e37b6d00b14fbea50c39784b768098",
+    "139": "bbd46bb4c64e4d6aa6783fd1fb6bc819",
+    "140": "fb0bd04bf5b54a89a728a8dae20f6878",
+    "141": "66a1334321bc4000b9c19ee35614538d",
+    "142": "e895e579fb5a4eeaa9608675b86d50cb"
   },
   "UltimateUpgradeAbility": {
     "1": "a965e279b9a44ee9aef10a406c10ad01",
@@ -1121,7 +1152,10 @@
   "ChargenForgeWorld": {
     "1": "96fd88d5d1fe4ba1a35746cde88aaf3c",
     "2": "eda2be0dda7841ce9cce6186ef6e0ce1",
-    "3": "08d6f8a4ebe143fe995582bb5c02072b"
+    "3": "08d6f8a4ebe143fe995582bb5c02072b",
+    "4": "06a6304a4bb64df39f03319ca284de40",
+    "5": "49572d6dd2064c718231d60b31abf3f4",
+    "6": "84c50690d9b84dadb77adba474a90ead"
   },
   "ChargenImperialWorld": {
     "1": "c4d908b662184bc9b6d110ef5abba8ba",
@@ -1157,7 +1191,7 @@
     "2": "037ac91349d945b785120849e8d51bf9",
     "3": "3ef2ffb9a92b4e4b9cde5371644e95d1"
   },
-  "ChargenCareerPath": {
+  "CareerPath": {
     "1": "974496d72fbe4329b438ee15cf004bd2",
     "2": "7b90955673a54136be9c11743943fdfe",
     "3": "fec9cd09f11b4615b7a17f441350d2d4",

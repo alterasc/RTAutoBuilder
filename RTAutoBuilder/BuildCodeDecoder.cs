@@ -99,7 +99,7 @@ internal static class BuildCodeDecoder
         {
             throw new Exception("Invalid code version");
         }
-        if (result.Version > 1)
+        if (result.Version > 2)
         {
             throw new Exception("Build is marked for version not supported by this mod version. Update the mod.");
         }

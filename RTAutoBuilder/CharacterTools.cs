@@ -1,6 +1,7 @@
 ﻿using Kingmaker.Blueprints;
 using Kingmaker.EntitySystem.Entities;
 using Kingmaker.Localization;
+using Kingmaker.UnitLogic;
 
 namespace RTAutoBuilder;
 
@@ -40,6 +41,8 @@ public static class CharacterTools
         new RTCharacter("Chorda", 14, "884b70bd817640dda143966166587b98", null, ["cabf247f1fb3494289f48a48512132f3"]),
         new RTCharacter("Winterscale", 15, "73c59c9ec5bd4c929be80e15d7f88c73"),
         new RTCharacter("Uralon", 16, "c222cb0668ea49f4a9ac04de2a3e25ba"),
+        new RTCharacter("Eogunn", 17, "2e5e746cc6d043ab8d395c67d07ac56b"),
+        new RTCharacter("CustomNavigator", 18, "2e5e746cc6d043ab8d395c67d07ac56b"),
     ];
 
     public static RTCharacter GetRTCharacter(BaseUnitEntity unitEntity)

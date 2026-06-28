@@ -74,7 +74,7 @@ internal class Exporter
         List<int> choices = [];
         List<int> bitsPerChoice = [];
 
-        choices.Add(1);
+        choices.Add(2);
         bitsPerChoice.Add(5);
 
         var rtChar = CharacterTools.GetRTCharacter(entity);
