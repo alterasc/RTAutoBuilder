@@ -219,6 +219,7 @@ internal static class BuildCodeDecoder
         {
             FeatureGroup.ActiveAbility or FeatureGroup.FirstCareerAbility or FeatureGroup.SecondCareerAbility or FeatureGroup.FirstOrSecondCareerAbility => "Ability",
             FeatureGroup.Talent or FeatureGroup.FirstCareerTalent or FeatureGroup.SecondCareerTalent or FeatureGroup.FirstOrSecondCareerTalent or FeatureGroup.CommonTalent => "Talent",
+            FeatureGroup.ChargenCareerPath => "CareerPath",
             FeatureGroup.None => string.Empty,
             _ => group.ToString(),
         };
