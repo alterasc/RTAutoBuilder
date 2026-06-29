@@ -2,7 +2,7 @@
   "Id": "RTAutoBuilder",
   "DisplayName": "Character Auto Builder",
   "Author": "AlterAsc",
-  "Version": "1.2.2",
+  "Version": "1.2.3",
   "ManagerVersion": "0.25.0",
   "Requirements": [],
   "AssemblyName": "RTAutoBuilder.dll",
