@@ -12,20 +12,9 @@ namespace RTAutoBuilder;
 internal class Exporter
 {
 
-    internal static string MapGroup(FeatureGroup group)
-    {
-        return group switch
-        {
-            FeatureGroup.ActiveAbility or FeatureGroup.FirstCareerAbility or FeatureGroup.SecondCareerAbility or FeatureGroup.FirstOrSecondCareerAbility => "Ability",
-            FeatureGroup.Talent or FeatureGroup.FirstCareerTalent or FeatureGroup.SecondCareerTalent or FeatureGroup.FirstOrSecondCareerTalent or FeatureGroup.CommonTalent => "Talent",
-            FeatureGroup.None => string.Empty,
-            _ => group.ToString(),
-        };
-    }
-
     static (int value, int length) GetIndex(FeatureGroup featureGroup, string guid)
     {
-        var mappedGroup = MapGroup(featureGroup);
+        var mappedGroup = BuildCodeDecoder.MapGroup(featureGroup);
         var mappings = Main.CodeGuidMap[mappedGroup];
         var length = BuildCodeDecoder.GetGroupLength(mappedGroup);
         var value = mappings.Where(x => x.Value == guid).First().Key;
@@ -34,7 +23,6 @@ internal class Exporter
 
     static void WriteGroupSelection(List<int> choices, List<int> bitsPerChoice, List<FeatureSelectionData> selections, FeatureGroup group)
     {
-        var mappedGroup = MapGroup(group);
         var list = selections.Where(x => x.Selection.Group == group).ToList();
         if (list.Count == 1)
         {
@@ -46,7 +34,7 @@ internal class Exporter
         }
         else
         {
-            var length = BuildCodeDecoder.GetGroupLength(mappedGroup);
+            var length = BuildCodeDecoder.GetGroupLength(group);
             choices.Add(0);
             bitsPerChoice.Add(length);
             Main.Log.Log($"Writing {0} for {length} bits for group {group}");
@@ -62,7 +50,7 @@ internal class Exporter
 
     static void WriteEmptyValue(List<int> choices, List<int> bitsPerChoice, FeatureGroup group)
     {
-        var r = BuildCodeDecoder.GetGroupLength(MapGroup(group));
+        var r = BuildCodeDecoder.GetGroupLength(group);
         choices.Add(0);
         bitsPerChoice.Add(r);
     }
@@ -99,7 +87,7 @@ internal class Exporter
         else
         {
             choices.Add(0);
-            bitsPerChoice.Add(BuildCodeDecoder.GetGroupLength(FeatureGroup.ChargenCareerPath.ToString()));
+            bitsPerChoice.Add(BuildCodeDecoder.GetGroupLength(FeatureGroup.ChargenCareerPath));
         }
         var statSelections = entity.Progression.m_Selections.Where(x => x.Level == 0 && x.Selection.Group == FeatureGroup.ChargenAttribute)
             .Select(x => (x.Feature as BlueprintAttributeAdvancement)!.Stat.ToString()).ToArray();

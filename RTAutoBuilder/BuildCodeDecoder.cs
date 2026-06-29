@@ -206,6 +206,11 @@ internal static class BuildCodeDecoder
         "WarhammerFellowship"
     ];
 
+    public static int GetGroupLength(FeatureGroup group)
+    {
+        return GetGroupLength(MapGroup(group));
+    }
+
     public static int GetGroupLength(string group)
     {
         var groupLength = Main.CodeGuidMap[group].Count;
@@ -213,7 +218,7 @@ internal static class BuildCodeDecoder
         return bitsNeeded;
     }
 
-    internal static string MapGroup(FeatureGroup group)
+    public static string MapGroup(FeatureGroup group)
     {
         return group switch
         {
