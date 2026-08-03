@@ -23,6 +23,6 @@ public class BuildPlan
 
     public string? GetSelection(BlueprintCareerPath path, int rank, FeatureGroup featureGroup)
     {
-        return Selections[path.AssetGuid].Where(x => x.Rank == rank && x.FeatureGroup == featureGroup.ToString()).FirstOrDefault()?.Selection;
+        return Selections[path.AssetGuid].FirstOrDefault(x => x.Rank == rank && x.FeatureGroup == featureGroup.ToString())?.Selection;
     }
 }

@@ -25,17 +25,23 @@ public static class Patches
             }
             try
             {
-
-                var rtCharacter = CharacterTools.GetRTCharacter(__instance.Unit);
+                var character = CharacterTools.GetChar(__instance.Unit);
+                var unit = __instance.Unit;
                 var instance = SaveSpecificSettings.Instance;
-                if (instance == null || !instance.AppliedBuilds.TryGetValue(rtCharacter.Id, out var buildCode))
+                if (instance == null)
+                {
+                    return;
+                }
+                if (!instance.AppliedBuilds.TryGetValue(unit.UniqueId, out var buildCode)
+                    && !instance.AppliedBuilds.TryGetValue(character.ToString(), out buildCode))
                 {
                     return;
                 }
                 var plan = Main.Settings.BuildPlans.FirstOrDefault(x => x.BuildCode == buildCode);
                 if (plan == null)
                 {
-                    instance.AppliedBuilds.Remove(rtCharacter.Id);
+                    instance.AppliedBuilds.Remove(unit.UniqueId);
+                    instance.AppliedBuilds.Remove(character.ToString());
                     Main.Log.Log($"Removed code {buildCode} from save, because it is no longer present in global settings");
                     return;
                 }

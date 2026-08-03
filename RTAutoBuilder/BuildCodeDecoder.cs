@@ -87,8 +87,9 @@ internal static class BuildCodeDecoder
         {
             arr = Base62.DecodeWithLength(code);
         }
-        catch (Exception)
+        catch (Exception e)
         {
+            Main.Log.LogException($"Failed to decode code {code}: {e.Message}", e);
             throw new Exception("Invalid code");
         }
         var unpacker = new BitUnpacker(arr);
@@ -103,16 +104,19 @@ internal static class BuildCodeDecoder
         {
             throw new Exception("Build is marked for version not supported by this mod version. Update the mod.");
         }
-        RTCharacter rtCharacter;
-        try
+        CharacterEnum character;
+
+        int index = unpacker.Read(5);
+        if (Enum.IsDefined(typeof(CharacterEnum), index))
         {
-            rtCharacter = CharacterTools.GetRTCharacter(unpacker.Read(5));
+            character = (CharacterEnum)index;
         }
-        catch (Exception)
+        else
         {
-            throw new Exception("Code for invalid character");
+            throw new Exception("Code for unknown character");
         }
-        result.UnitId = rtCharacter.Id;
+
+        result.UnitId = character.ToString();
         BlueprintCareerPath firstArchetype;
         BlueprintCareerPath secondArchetype;
         try
@@ -161,6 +165,27 @@ internal static class BuildCodeDecoder
         ReadArchetypeSelections(result, unpacker, secondArchetype);
         ReadArchetypeSelections(result, unpacker, exemplarArchetype);
         return result;
+    }
+
+    internal static string ReencodeAsCharacter(string originalCode, CharacterEnum newCharacter)
+    {
+        var bytes = Base62.DecodeWithLength(originalCode);
+        var unpacker = new BitUnpacker(bytes);
+
+        int version = unpacker.Read(5);
+        int _ = unpacker.Read(5);
+
+        List<int> choices = [version, (int)newCharacter];
+        List<int> bitsPerChoice = [5, 5];
+
+        while (unpacker.HasMore())
+        {
+            choices.Add(unpacker.Read(1));
+            bitsPerChoice.Add(1);
+        }
+
+        byte[] packed = BitPacker.PackChoices([.. choices], [.. bitsPerChoice]);
+        return Base62.EncodeWithLength(packed);
     }
 
     private static void ReadArchetypeSelections(BuildPlan result, BitUnpacker unpacker, BlueprintCareerPath archetype)

@@ -17,8 +17,16 @@ internal class Exporter
         var mappedGroup = BuildCodeDecoder.MapGroup(featureGroup);
         var mappings = Main.CodeGuidMap[mappedGroup];
         var length = BuildCodeDecoder.GetGroupLength(mappedGroup);
-        var value = mappings.Where(x => x.Value == guid).First().Key;
-        return (value, length);
+        try
+        {
+            var value = mappings.Where(x => x.Value == guid).First().Key;
+            return (value, length);
+        }
+        catch (InvalidOperationException e)
+        {
+            Main.Log.LogException($"Unable to find index for GUID: {guid} in group {featureGroup}", e);
+            throw;
+        }
     }
 
     static void WriteGroupSelection(List<int> choices, List<int> bitsPerChoice, List<FeatureSelectionData> selections, FeatureGroup group)
@@ -65,8 +73,8 @@ internal class Exporter
         choices.Add(2);
         bitsPerChoice.Add(5);
 
-        var rtChar = CharacterTools.GetRTCharacter(entity);
-        choices.Add(rtChar.Index);
+        var character = CharacterTools.GetChar(entity);
+        choices.Add(((int)character));
         bitsPerChoice.Add(5);
 
         BlueprintCareerPath firstArchetype = entity.Progression.AllCareerPaths.Select(x => x.Blueprint)
@@ -147,7 +155,7 @@ internal class Exporter
                 }
                 catch (Exception)
                 {
-                    Main.Log.Log("Couldn't ");
+                    throw new Exception("Error processing archetype selections for archetype: " + archetype.name + ", rank: " + (i + 1) + ", selection: " + selectionFeature.name);
                 }
             }
         }

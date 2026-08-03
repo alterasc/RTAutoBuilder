@@ -24,7 +24,7 @@
 		<Reference Include="$(RogueTraderInstallDir)\WH40KRT_Data\Managed\Code.dll*" Publicize="true" Private="false" />
 		<Reference Include="$(RogueTraderInstallDir)\WH40KRT_Data\Managed\LocalizationShared.dll*" Publicize="true" Private="false" />
 		<None Remove="facts_enumerated.json" />
-		<Reference Include="$(RogueTraderData)\UnityModManager\UnityModManager.dll" Private="false" />
+		<Reference Include="$(RogueTraderData)\UnityModManager\UnityModManager.dll*"  Publicize="true" Private="false" />
 		<Reference Include="$(RogueTraderInstallDir)\WH40KRT_Data\Managed\0Harmony.dll" Private="false" />
 		<Reference Include="$(RogueTraderInstallDir)\WH40KRT_Data\Managed\Newtonsoft.Json.dll" Private="false" />
 		<Reference Include="$(RogueTraderInstallDir)\WH40KRT_Data\Managed\UniRx.dll" Private="false" />
